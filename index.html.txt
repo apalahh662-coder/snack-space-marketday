@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snack Space Cloud Store & Seller Dashboard - SMPI Al-Azhar Kembangan 10</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- 
+    ======================================================================
+    🔥 KONFIGURASI FIREBASE (TEMPAT MENEMPELKAN KODE DARI FIREBASE) 🔥
+    Ganti nilai "mock" di bawah ini dengan kode firebaseConfig milik kamu!
+    ======================================================================
+    -->
+    <script>
+        const firebaseConfig = {
+         apiKey: "AIzaSyDns7iR6Hrc7Ofc_oGEq8KvlcC0i4Gc-oY",
+  	 authDomain: "snack-space-marketday.firebaseapp.com",
+  	 projectId: "snack-space-marketday",
+ 	 storageBucket: "snack-space-marketday.firebasestorage.app",
+ 	 messagingSenderId: "150869484685",
+ 	 appId: "1:150869484685:web:5bc7d88e4f6e4c213faec4"
+
+        };
+        const appId = firebaseConfig.projectId || 'snack-space-app';
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background-color: #5c94fc;
+            background-image: 
+                radial-gradient(#ffffff 15%, transparent 16%),
+                radial-gradient(#ffffff 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            color: #222;
+        }
+
+        .pixel-font { font-family: 'Press Start 2P', monospace; }
+
+        .mario-card {
+            background-color: #ffffff;
+            color: #2d3748;
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0px #000;
+            border-radius: 12px;
+        }
+
+        .mario-btn-yellow { background-color: #f8b800; border: 3px solid #000; color: #000; box-shadow: 0 4px 0 #b88600, 0 6px 0 #000; transition: all 0.1s ease; }
+        .mario-btn-yellow:active { transform: translateY(3px); box-shadow: 0 1px 0 #b88600, 0 3px 0 #000; }
+        .mario-btn-yellow:disabled { filter: grayscale(1); cursor: not-allowed; transform: none; box-shadow: 0 4px 0 #666, 0 6px 0 #000; }
+
+        .mario-btn-green { background-color: #00a800; border: 3px solid #000; color: white; box-shadow: 0 4px 0 #006000, 0 6px 0 #000; transition: all 0.1s ease; }
+        .mario-btn-green:active { transform: translateY(3px); box-shadow: 0 1px 0 #006000, 0 3px 0 #000; }
+
+        .mario-btn-red { background-color: #e52521; border: 3px solid #000; color: white; box-shadow: 0 4px 0 #990000, 0 6px 0 #000; transition: all 0.1s ease; }
+        .mario-btn-red:active { transform: translateY(3px); box-shadow: 0 1px 0 #990000, 0 3px 0 #000; }
+
+        .mario-btn-blue { background-color: #0088fe; border: 3px solid #000; color: white; box-shadow: 0 4px 0 #0055b3, 0 6px 0 #000; transition: all 0.1s ease; }
+        .mario-btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #0055b3, 0 3px 0 #000; }
+
+        .mario-input { border: 3px solid #000; box-shadow: 3px 3px 0 #888; border-radius: 8px; outline: none; color: #1a202c; }
+        .mario-input:focus { border-color: #e52521; box-shadow: 4px 4px 0 #e52521; }
+
+        .q-block { background-color: #fc9838; border: 4px solid #000; box-shadow: 4px 4px 0 #000; position: relative; cursor: pointer; transition: transform 0.1s ease; }
+        .q-block:active { transform: translateY(-6px); }
+
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .animate-float { animation: float 2.5s ease-in-out infinite; }
+
+        @keyframes coinSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        .coin-icon { display: inline-block; animation: coinSpin 1.2s infinite linear; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-left: 2px solid #000; }
+        ::-webkit-scrollbar-thumb { background: #e52521; border: 2px solid #000; border-radius: 4px; }
+        
+        .toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 15px 20px; border-radius: 8px; border: 3px solid #000; font-family: 'Fredoka', sans-serif; font-weight: bold; color: white; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 10px; max-width: 300px; }
+        .toast.show { transform: translateX(0); }
+        .toast-success { background-color: #00a800; }
+        .toast-error { background-color: #e52521; }
+        .toast-info { background-color: #0088fe; }
+    </style>
+</head>
+<body class="min-h-screen pb-32">
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <header class="sticky top-0 z-40 bg-black text-white py-3 px-4 border-b-4 border-yellow-400 shadow-xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl animate-bounce">🍓</span>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="pixel-font text-[10px] text-yellow-400 bg-red-600 px-2 py-0.5 rounded border border-white">SNACK SPACE</span>
+                        <span id="live-indicator" class="inline-flex items-center text-[10px] bg-green-900 text-green-300 px-2 py-0.5 rounded-full border border-green-500">
+                            <span id="ping-dot" class="w-2 h-2 mr-1 bg-green-400 rounded-full animate-ping"></span> <span id="clock">Ready</span>
+                        </span>
+                    </div>
+                    <h1 class="pixel-font text-xs md:text-sm text-white mt-1">SMPI AL-AZHAR KEMBANGAN 10</h1>
+                </div>
+            </div>
+
+            <div class="flex items-center bg-gray-900 p-1.5 rounded-xl border-2 border-yellow-400 space-x-2">
+                <button id="nav-btn-buyer" onclick="switchView('buyer')" class="mario-btn-yellow px-4 py-1.5 text-xs pixel-font rounded-lg flex items-center space-x-2 font-bold">
+                    <span>🛒 TOKO PEMBELI</span>
+                </button>
+                <button id="nav-btn-seller" onclick="attemptSellerLogin()" class="px-4 py-1.5 text-xs pixel-font rounded-lg text-gray-300 hover:text-white flex items-center space-x-2 font-bold transition">
+                    <span>👑 DASHBOARD ADMIN</span>
+                    <span id="badge-pending-orders" class="bg-red-600 text-white text-[9px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button id="sound-btn" onclick="toggleSound()" title="Toggle Suara Retro" class="bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg border border-yellow-400 text-yellow-300 text-xs font-bold transition">
+                    <span id="sound-icon">🔊</span> SFX
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="buyer-view" class="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+        <div class="mario-card p-5 text-center relative overflow-hidden bg-gradient-to-b from-yellow-100 to-yellow-300">
+            <div class="absolute -top-3 -right-3 text-5xl opacity-20 select-none">⭐</div>
+            <div class="flex justify-center mb-2">
+                <div onclick="hitQuestionBlock(event)" id="hero-q-block" class="q-block px-4 py-2 rounded-lg flex items-center space-x-2 border-2 border-black relative">
+                    <span class="pixel-font text-yellow-200 text-lg font-bold">?</span>
+                    <span class="pixel-font text-xs text-white">KLIK UNTUK EGG!</span>
+                </div>
+            </div>
+            <h2 class="pixel-font text-lg md:text-2xl text-red-600 mb-2 leading-tight drop-shadow">SNACK SPACE MARKET DAY</h2>
+            <p class="text-sm md:text-base font-bold text-gray-800 max-w-lg mx-auto bg-white/70 py-1.5 px-3 rounded-full border border-black/20 shadow-sm inline-block">
+                ✨ Got a Craving? Come to Snack Space and Grab Your Favorite! 🍡🍓🥞
+            </p>
+        </div>
+
+        <section class="mario-card p-5 bg-white">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 border-black pixel-font text-sm">1</div>
+                <h3 class="pixel-font text-sm md:text-base text-gray-900">IDENTITAS PEMBELI</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1 text-gray-700" for="buyer-name"><i class="fa-solid fa-user text-red-500 mr-1"></i> Nama Lengkap / Panggilan *</label>
+                    <input type="text" id="buyer-name" placeholder="Contoh: Kayla" class="mario-input w-full p-2.5 text-sm bg-yellow-50 focus:bg-white transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1 text-gray-700" for="buyer-class"><i class="fa-solid fa-school text-blue-500 mr-1"></i> Kelas / Identitas *</label>
+                    <input type="text" id="buyer-class" placeholder="Contoh: 9A / Guru" class="mario-input w-full p-2.5 text-sm bg-yellow-50 focus:bg-white transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1 text-gray-700" for="buyer-phone"><i class="fa-brands fa-whatsapp text-green-500 mr-1"></i> No. HP / WA *</label>
+                    <input type="tel" id="buyer-phone" placeholder="Contoh: 081234..." class="mario-input w-full p-2.5 text-sm bg-yellow-50 focus:bg-white transition-colors">
+                </div>
+            </div>
+        </section>
+
+        <section class="mario-card p-5 bg-white">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 border-black pixel-font text-sm">2</div>
+                    <h3 class="pixel-font text-sm md:text-base text-gray-900">DAFTAR MENU</h3>
+                </div>
+                <span id="mode-badge" class="inline-flex items-center text-xs bg-green-100 text-green-800 font-bold px-2.5 py-1 rounded-full border border-green-400 self-start sm:self-auto">
+                    <i class="fa-solid fa-check-circle mr-1"></i> Mode Standar
+                </span>
+            </div>
+
+            <div class="mb-4 space-y-3">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="search-input" oninput="filterBuyerProducts()" placeholder="Cari menu favorit..." class="mario-input w-full pl-9 pr-3 py-2 text-xs bg-gray-50 focus:bg-white">
+                </div>
+            </div>
+
+            <div class="space-y-4" id="buyer-product-container">
+                <!-- Products injected dynamically by JS -->
+            </div>
+        </section>
+
+        <div class="mario-card p-4 bg-red-50 flex items-start space-x-3 border-2 border-red-300">
+            <div class="text-3xl animate-float select-none">🎪💸</div>
+            <div class="text-xs text-gray-700">
+                <p class="font-bold text-red-700 mb-1">Catatan Pengambilan & Pembayaran (Market Day):</p>
+                <p>Setelah menekan tombol kirim, pesanan kamu akan <b>otomatis diarahkan ke WhatsApp Admin</b> (Kayla / Mutiara). Pembayaran dilakukan secara COD / tunai dan pesanan dapat diambil langsung di <b>stand Snack Space yang berada di lapangan SMPI Al-Azhar Kembangan 10</b>!</p>
+                <div class="mt-3 pt-3 border-t border-red-200">
+                    <p class="font-bold text-red-700 mb-2"><i class="fa-solid fa-headset mr-1"></i> Pusat Informasi & Bantuan (Admin Kayla & Mutiara):</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="flex flex-col bg-white/60 p-2 rounded border border-red-200">
+                            <a href="https://wa.me/6281382367076" target="_blank" class="text-green-700 hover:text-green-600 font-bold flex items-center transition text-xs">
+                                <i class="fa-brands fa-whatsapp text-base mr-1"></i> +62 813-8236-7076
+                            </a>
+                            <span class="text-[11px] text-gray-600 ml-5 font-semibold">Kayla (Admin Snack Space)</span>
+                        </div>
+                        <div class="flex flex-col bg-white/60 p-2 rounded border border-red-200">
+                            <a href="https://wa.me/6281382367088" target="_blank" class="text-green-700 hover:text-green-600 font-bold flex items-center transition text-xs">
+                                <i class="fa-brands fa-whatsapp text-base mr-1"></i> +62 813-8236-7088
+                            </a>
+                            <span class="text-[11px] text-gray-600 ml-5 font-semibold">Mutiara (Admin Snack Space)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="seller-view" class="max-w-7xl mx-auto px-4 pt-6 space-y-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-black p-4 rounded-xl border-4 border-yellow-400 text-white shadow-lg">
+            <div class="flex items-center space-x-2">
+                <span class="pixel-font text-xs text-yellow-400">👑 PANEL MONITORING (SNACK SPACE - KAYLA & MUTIARA)</span>
+            </div>
+            <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                <button onclick="openManualOrderModal()" class="mario-btn-green px-3 py-1.5 text-xs rounded-lg flex items-center space-x-1 font-bold">
+                    <i class="fa-solid fa-plus"></i><span>Tambah Manual</span>
+                </button>
+                <button onclick="openStockModal()" class="mario-btn-blue px-3 py-1.5 text-xs rounded-lg flex items-center space-x-1 font-bold">
+                    <i class="fa-solid fa-boxes-stacked"></i><span>Kelola Produk & Stok</span>
+                </button>
+                <button onclick="simulateOrder()" class="mario-btn-yellow px-3 py-1.5 text-xs rounded-lg flex items-center space-x-1 font-bold" title="Uji Coba Pesanan Masuk">
+                    <i class="fa-solid fa-bolt"></i><span>Simulasi Order</span>
+                </button>
+                <button onclick="openChangePinModal()" class="mario-btn-blue px-3 py-1.5 text-xs rounded-lg flex items-center space-x-1 font-bold" title="Ubah PIN Admin">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+                <button onclick="logoutAdmin()" class="mario-btn-red px-3 py-1.5 text-xs rounded-lg flex items-center space-x-1 font-bold" title="Kunci Dashboard Admin">
+                    <i class="fa-solid fa-lock"></i><span>Keluar</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="mario-card p-4 bg-gradient-to-br from-yellow-50 to-amber-100 relative overflow-hidden">
+                <div class="text-3xl absolute -right-2 -bottom-2 opacity-20">🪙</div>
+                <p class="pixel-font text-[10px] text-gray-600 uppercase font-bold">PENDAPATAN (LUNAS)</p>
+                <p id="stat-revenue" class="pixel-font text-lg md:text-xl text-green-700 font-extrabold mt-2">Rp 0</p>
+                <p class="text-xs text-gray-500 mt-1">Estimasi Kotor: <span id="stat-gross-revenue">Rp 0</span></p>
+            </div>
+            <div class="mario-card p-4 bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
+                <div class="text-3xl absolute -right-2 -bottom-2 opacity-20">📦</div>
+                <p class="pixel-font text-[10px] text-gray-600 uppercase font-bold">TOTAL PESANAN</p>
+                <p id="stat-orders-count" class="pixel-font text-lg md:text-xl text-blue-700 font-extrabold mt-2">0</p>
+                <p class="text-xs text-gray-500 mt-1"><span id="stat-pending-count" class="font-bold text-red-500">0</span> perlu diproses</p>
+            </div>
+            <div class="mario-card p-4 bg-gradient-to-br from-red-50 to-rose-100 relative overflow-hidden">
+                <div class="text-3xl absolute -right-2 -bottom-2 opacity-20">🍰</div>
+                <p class="pixel-font text-[10px] text-gray-600 uppercase font-bold">ITEM TERJUAL</p>
+                <p id="stat-items-sold" class="pixel-font text-lg md:text-xl text-red-600 font-extrabold mt-2">0 Pcs</p>
+                <p class="text-xs text-gray-500 mt-1">Berdasarkan pesanan Lunas</p>
+            </div>
+            <div class="mario-card p-4 bg-gradient-to-br from-emerald-50 to-teal-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center">
+                        <p class="pixel-font text-[10px] text-gray-600 uppercase font-bold">TARGET (500rb)</p>
+                        <span id="target-percent" class="pixel-font text-[10px] text-emerald-700">0%</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-300 rounded-full h-4 border-2 border-black overflow-hidden mt-2 relative">
+                    <div id="target-progress-bar" class="bg-emerald-500 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="mario-card p-4 bg-white lg:col-span-2">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b-2 border-gray-200">
+                    <h3 class="pixel-font text-xs md:text-sm text-red-600 flex items-center"><i class="fa-solid fa-chart-pie mr-2"></i> REKAP ITEM (SEMUA STATUS)</h3>
+                </div>
+                <div id="product-summary-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+            <div class="mario-card p-4 bg-yellow-50">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b-2 border-yellow-200">
+                    <h3 class="pixel-font text-xs text-yellow-800 flex items-center"><i class="fa-solid fa-school mr-2"></i> PENGIRIMAN PER KELAS</h3>
+                </div>
+                <div id="class-summary-list" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-sm">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="mario-card p-5 bg-white mb-20">
+            <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 mb-5 pb-4 border-b-2 border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <h3 class="pixel-font text-sm text-gray-900 flex items-center"><i class="fa-solid fa-list-check text-red-600 mr-2"></i> DAFTAR PESANAN MASUK</h3>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative flex-1 sm:w-48">
+                        <input type="text" id="seller-search-input" oninput="renderOrders()" placeholder="Cari nama / kelas..." class="mario-input w-full pl-8 pr-3 py-1.5 text-xs">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                    </div>
+                    <select id="filter-status" onchange="renderOrders()" class="mario-input px-2 py-1.5 text-xs bg-white">
+                        <option value="ALL">Semua Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Proses">Diproses</option>
+                        <option value="Siap">Siap Diantar</option>
+                        <option value="Selesai">Lunas</option>
+                    </select>
+                    <div class="flex border-2 border-black rounded-lg overflow-hidden bg-gray-100">
+                        <button id="view-btn-card" onclick="setViewMode('card')" class="px-2.5 py-1.5 text-xs bg-yellow-400 text-black font-bold border-r-2 border-black"><i class="fa-solid fa-table-cells-large"></i></button>
+                        <button id="view-btn-table" onclick="setViewMode('table')" class="px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-200 font-bold"><i class="fa-solid fa-table-list"></i></button>
+                    </div>
+                    <button onclick="exportToCSV()" class="mario-btn-yellow px-3 py-1.5 text-xs rounded-lg font-bold flex items-center space-x-1">
+                        <i class="fa-solid fa-file-excel"></i><span class="hidden sm:inline">Export</span>
+                    </button>
+                    <button onclick="openConfirmModal('Hapus seluruh riwayat pesanan?', confirmResetData)" class="mario-btn-red px-2.5 py-1.5 text-xs rounded-lg font-bold" title="Hapus Semua Pesanan"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </div>
+
+            <div id="orders-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="orders-table-container" class="hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse border-2 border-black text-xs">
+                    <thead>
+                        <tr class="bg-yellow-400 text-black font-bold border-b-2 border-black pixel-font text-[10px]">
+                            <th class="p-2 border-r border-black">Waktu</th>
+                            <th class="p-2 border-r border-black">Siswa/Kelas</th>
+                            <th class="p-2 border-r border-black">Pesanan</th>
+                            <th class="p-2 border-r border-black">Total</th>
+                            <th class="p-2 border-r border-black">Status</th>
+                            <th class="p-2 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body" class="divide-y border-black font-semibold"></tbody>
+                </table>
+            </div>
+
+            <div id="empty-state" class="text-center py-12 hidden">
+                <div class="text-5xl mb-3 animate-bounce">💨</div>
+                <h3 class="pixel-font text-sm text-gray-700">BELUM ADA PESANAN</h3>
+                <p class="text-xs text-gray-500 mt-1">Tunggu pembeli memesan atau tambahkan manual.</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="buyer-sticky-bar" class="fixed bottom-0 left-0 right-0 bg-yellow-400 border-t-4 border-black p-3 z-30 shadow-[0_-10px_20px_rgba(0,0,0,0.2)]">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <div>
+                <p class="pixel-font text-[10px] text-gray-800 uppercase">TOTAL (<span id="total-qty">0</span> item)</p>
+                <p class="pixel-font text-base md:text-xl text-red-600 font-extrabold" id="total-price">Rp 0</p>
+            </div>
+            <button id="btn-submit" onclick="submitBuyerOrder()" class="mario-btn-green pixel-font text-xs md:text-sm px-4 md:px-6 py-3 flex items-center space-x-2 rounded-lg" disabled>
+                <span>KIRIM PESANAN</span>
+                <i class="fa-solid fa-paper-plane text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="receipt-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="mario-card bg-white max-w-md w-full p-6 relative my-8 shadow-[0_0_20px_#f8b800]">
+            <div class="text-center mb-4">
+                <div class="text-6xl mb-2 animate-bounce drop-shadow-md">🎉🚀🍄</div>
+                <h3 class="pixel-font text-lg text-green-600 mt-4 leading-tight drop-shadow">YAY! PESANAN BERHASIL TERKIRIM!</h3>
+                <div class="bg-yellow-100 border-2 border-yellow-400 p-3 rounded-lg mt-3 mb-3 transform rotate-1 hover:rotate-0 transition-transform cursor-default">
+                    <p class="text-base font-extrabold text-red-600">TERIMA KASIH ORANG BAIK! 🥰</p>
+                    <p class="text-xs font-bold text-gray-700 mt-1">Pesanan kamu telah dicatat dan dikirim ke Admin!</p>
+                </div>
+                <p class="text-[11px] font-bold bg-blue-100 text-blue-800 py-1.5 px-3 rounded-full inline-block border-2 border-blue-300">Silakan ambil pesanan & bayar di stand Snack Space (Lapangan SMPI Al-Azhar Kembangan 10) ya! 💸</p>
+            </div>
+            
+            <div id="receipt-details" class="bg-gray-50 border-2 border-dashed border-gray-400 p-3 rounded-lg text-xs space-y-2 mb-4 font-mono"></div>
+            
+            <div class="grid grid-cols-1 gap-2 mb-4">
+                <button onclick="copyBuyerReceipt()" class="mario-btn-blue py-2 px-3 text-xs font-bold rounded-lg flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-copy"></i><span>Salin Struk Pesanan</span>
+                </button>
+                <button onclick="sendBuyerReceiptToWA()" class="mario-btn-green py-2 px-3 text-xs font-bold rounded-lg flex items-center justify-center space-x-1">
+                    <i class="fa-brands fa-whatsapp"></i><span>Chat Admin (Kayla/Mutiara)</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2">
+                <button onclick="closeReceiptModal()" class="mario-btn-yellow w-full py-3 pixel-font text-xs rounded-lg">KEMBALI KE TOKO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 hidden">
+        <div class="mario-card bg-gray-100 max-w-sm w-full p-6 text-center relative">
+            <button onclick="closeModal('login-modal')" class="absolute top-2 right-3 text-2xl font-bold">&times;</button>
+            <div class="text-4xl mb-4">🔐</div>
+            <h3 class="pixel-font text-sm text-red-600 mb-4">AKSES ADMIN (KAYLA & MUTIARA)</h3>
+            <input type="password" id="admin-pin-input" placeholder="Masukkan PIN..." class="mario-input w-full p-3 text-center text-lg tracking-[0.5em] font-bold mb-4">
+            <button onclick="verifyAdminPin()" class="mario-btn-blue w-full py-3 pixel-font text-xs rounded-lg">MASUK</button>
+        </div>
+    </div>
+
+    <!-- PIN Modal -->
+    <div id="pin-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="mario-card bg-white max-w-sm w-full p-6 text-center relative">
+            <button onclick="closeModal('pin-modal')" class="absolute top-2 right-3 text-2xl font-bold">&times;</button>
+            <h3 class="pixel-font text-sm text-blue-600 mb-4">UBAH PIN ADMIN</h3>
+            <div class="space-y-3">
+                <input type="password" id="new-pin-input" placeholder="PIN Baru..." class="mario-input w-full p-2 text-center font-bold">
+                <input type="password" id="new-pin-confirm" placeholder="Konfirmasi PIN..." class="mario-input w-full p-2 text-center font-bold">
+                <button onclick="saveNewPin()" class="mario-btn-green w-full py-2.5 pixel-font text-[10px] rounded-lg">SIMPAN PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Modal -->
+    <div id="stock-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="mario-card bg-white max-w-lg w-full p-6 relative max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="pixel-font text-sm text-blue-600 flex items-center"><i class="fa-solid fa-boxes-stacked mr-2"></i> KELOLA PRODUK & STOK</h3>
+                <button onclick="closeModal('stock-modal')" class="text-2xl font-bold">&times;</button>
+            </div>
+            
+            <form onsubmit="handleProductSubmit(event)" class="mb-4 p-3 bg-gray-100 border-2 border-black rounded-lg text-xs">
+                <input type="hidden" id="prod-id">
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div><label class="font-bold">Nama Item</label><input type="text" id="prod-name" required class="mario-input w-full p-1.5"></div>
+                    <div><label class="font-bold">Harga (Rp)</label><input type="number" id="prod-price" required min="0" class="mario-input w-full p-1.5"></div>
+                    <div>
+                        <label class="font-bold">Kategori</label>
+                        <select id="prod-cat" class="mario-input w-full p-1.5 bg-white">
+                            <option value="food">Makanan</option>
+                            <option value="accessory">Aksesoris</option>
+                        </select>
+                    </div>
+                    <div><label class="font-bold">Emoji Icon</label><input type="text" id="prod-icon" required class="mario-input w-full p-1.5" placeholder="🍲"></div>
+                    <div class="col-span-2">
+                        <label class="font-bold">Batas Stok Maksimal (Kosongkan jika unlimited)</label>
+                        <input type="number" id="prod-max-stock" class="mario-input w-full p-1.5" placeholder="Contoh: 15">
+                    </div>
+                </div>
+                <button type="submit" class="mario-btn-green w-full py-2 font-bold rounded mt-2">Simpan Produk</button>
+            </form>
+            <div id="stock-list-container" class="overflow-y-auto space-y-2 flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Manual Order Modal -->
+    <div id="manual-order-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="mario-card bg-white max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="pixel-font text-sm text-green-600 flex items-center"><i class="fa-solid fa-plus mr-2"></i> TAMBAH PESANAN MANUAL</h3>
+                <button onclick="closeModal('manual-order-modal')" class="text-2xl font-bold">&times;</button>
+            </div>
+            <form onsubmit="handleManualOrderSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold mb-1">Nama Pembeli *</label>
+                    <input type="text" id="man-name" required placeholder="Contoh: Budi" class="mario-input w-full p-2 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Kelas / Identitas *</label>
+                    <input type="text" id="man-class" required placeholder="Contoh: 8B" class="mario-input w-full p-2 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">No. HP / WA *</label>
+                    <input type="tel" id="man-phone" required placeholder="Contoh: 0812345678" class="mario-input w-full p-2 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Pilih Produk *</label>
+                    <select id="man-product" class="mario-input w-full p-2 bg-white font-bold">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Jumlah (Pcs) *</label>
+                    <input type="number" id="man-qty" required min="1" value="1" class="mario-input w-full p-2 bg-gray-50">
+                </div>
+                <button type="submit" class="mario-btn-green w-full py-2.5 font-bold rounded-lg text-xs">Tambahkan Pesanan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="mario-card bg-white max-w-sm w-full p-6 text-center relative space-y-4">
+            <div class="text-4xl">⚠️</div>
+            <h3 id="confirm-message" class="font-bold text-sm text-gray-800">Apakah Anda yakin?</h3>
+            <div class="flex space-x-2">
+                <button id="confirm-btn-yes" class="mario-btn-green flex-1 py-2 text-xs font-bold rounded">Ya</button>
+                <button onclick="closeModal('confirm-modal')" class="mario-btn-red flex-1 py-2 text-xs font-bold rounded">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app = null, db = null, auth = null, userId = null;
+        let useFirebase = false;
+
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function unlockAudioOnMobile() {
+            const ctx = getAudioContext();
+            if (ctx && ctx.state === 'running') {
+                window.removeEventListener('touchstart', unlockAudioOnMobile);
+                window.removeEventListener('click', unlockAudioOnMobile);
+            }
+        }
+        window.addEventListener('touchstart', unlockAudioOnMobile, { passive: true });
+        window.addEventListener('click', unlockAudioOnMobile, { passive: true });
+
+        window.playSound = function(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                const now = ctx.currentTime;
+
+                if (type === 'coin') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(987.77, now);
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'jump') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        window.toggleSound = function() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+            showToast(soundEnabled ? 'Suara Retro diaktifkan!' : 'Suara dimatikan.', 'info');
+        }
+
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            let icon = 'fa-circle-check';
+            if (type === 'error') icon = 'fa-circle-exclamation';
+            if (type === 'info') icon = 'fa-circle-info';
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        let products = [
+            { id: '1', name: 'Mochi Bites', price: 10000, category: 'food', icon: '🍡', maxStock: 30 },
+            { id: '2', name: 'Strawberry Coklat Kunafa', price: 20000, category: 'food', icon: '🍫', maxStock: 25 },
+            { id: '3', name: 'Mini Pancake', price: 12000, category: 'food', icon: '🥞', maxStock: 30 }
+        ];
+
+        let cart = {};
+        let orders = [];
+        let adminPin = localStorage.getItem('snack_space_pin') || '1234';
+        let isAdminLoggedIn = false;
+        let viewMode = 'card';
+        let lastSubmittedReceipt = null;
+
+        // Load local data on start
+        const savedProds = localStorage.getItem('snack_space_products');
+        if (savedProds) {
+            try { products = JSON.parse(savedProds); } catch(e){}
+        }
+        const savedOrders = localStorage.getItem('snack_space_orders');
+        if (savedOrders) {
+            try { orders = JSON.parse(savedOrders); } catch(e){}
+        }
+
+        function formatWhatsAppNumber(phone) {
+            let cleaned = phone.replace(/[^0-9]/g, '');
+            if (cleaned.startsWith('0')) {
+                cleaned = '62' + cleaned.substring(1);
+            } else if (cleaned.startsWith('8')) {
+                cleaned = '62' + cleaned;
+            } else if (!cleaned.startsWith('62')) {
+                cleaned = '62' + cleaned;
+            }
+            return cleaned;
+        }
+
+        async function initFirebaseApp() {
+            try {
+                if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && firebaseConfig.apiKey !== 'mock') {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    userId = auth.currentUser ? auth.currentUser.uid : crypto.randomUUID();
+                    useFirebase = true;
+                    setupFirestoreListeners();
+                    document.getElementById('mode-badge').innerHTML = `<i class="fa-solid fa-cloud mr-1"></i> Firebase Realtime Cloud`;
+                } else {
+                    enableLocalFallback();
+                }
+            } catch (e) {
+                console.warn("Firebase initialization failed, falling back to local mode:", e);
+                enableLocalFallback();
+            }
+        }
+
+        function enableLocalFallback() {
+            useFirebase = false;
+            document.getElementById('mode-badge').innerHTML = `<i class="fa-solid fa-hard-drive mr-1"></i> Local Storage`;
+            renderBuyerProducts();
+        }
+
+        function setupFirestoreListeners() {
+            if (!db) return;
+
+            const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+            onSnapshot(productsRef, (snapshot) => {
+                const loadedProducts = [];
+                snapshot.forEach(docSnap => {
+                    loadedProducts.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if (loadedProducts.length > 0) {
+                    products = loadedProducts;
+                    localStorage.setItem('snack_space_products', JSON.stringify(products));
+                } else {
+                    products.forEach(p => {
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', p.id), p);
+                    });
+                }
+                renderBuyerProducts();
+                if (typeof renderStockList === 'function') renderStockList();
+            }, (error) => {
+                console.error("Products subscription error:", error);
+                enableLocalFallback();
+            });
+
+            const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            onSnapshot(ordersRef, (snapshot) => {
+                const loadedOrders = [];
+                snapshot.forEach(docSnap => {
+                    loadedOrders.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                loadedOrders.sort((a, b) => (b.orderNumber || 0) - (a.orderNumber || 0));
+                orders = loadedOrders;
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                if (isAdminLoggedIn) {
+                    renderSellerDashboard();
+                }
+                updatePendingBadge();
+            }, (error) => {
+                console.error("Orders subscription error:", error);
+            });
+        }
+
+        window.switchView = function(view) {
+            playSound('click');
+            const buyerView = document.getElementById('buyer-view');
+            const sellerView = document.getElementById('seller-view');
+            const buyerBar = document.getElementById('buyer-sticky-bar');
+            const btnBuyer = document.getElementById('nav-btn-buyer');
+            const btnSeller = document.getElementById('nav-btn-seller');
+
+            if (view === 'buyer') {
+                buyerView.classList.remove('hidden');
+                sellerView.classList.add('hidden');
+                buyerBar.classList.remove('hidden');
+                btnBuyer.className = 'mario-btn-yellow px-4 py-1.5 text-xs pixel-font rounded-lg flex items-center space-x-2 font-bold';
+                btnSeller.className = 'px-4 py-1.5 text-xs pixel-font rounded-lg text-gray-300 hover:text-white flex items-center space-x-2 font-bold transition';
+            } else {
+                if (!isAdminLoggedIn) {
+                    document.getElementById('login-modal').classList.remove('hidden');
+                    return;
+                }
+                buyerView.classList.add('hidden');
+                sellerView.classList.remove('hidden');
+                buyerBar.classList.add('hidden');
+                btnSeller.className = 'mario-btn-yellow px-4 py-1.5 text-xs pixel-font rounded-lg flex items-center space-x-2 font-bold';
+                btnBuyer.className = 'px-4 py-1.5 text-xs pixel-font rounded-lg text-gray-300 hover:text-white flex items-center space-x-2 font-bold transition';
+                renderSellerDashboard();
+            }
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('id-ID');
+        }, 1000);
+
+        window.renderBuyerProducts = function() {
+            const container = document.getElementById('buyer-product-container');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = products.filter(p => p.name.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gray-500 text-xs">Menu tidak ditemukan.</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const qty = cart[p.id] || 0;
+                const card = document.createElement('div');
+                card.className = `mario-card p-4 flex items-center justify-between bg-white transition hover:bg-yellow-50/50`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl border-2 border-black flex items-center justify-center text-2xl shadow-inner select-none">
+                            ${p.icon}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm md:text-base">${p.name}</h4>
+                            <p class="pixel-font text-xs text-red-600 font-extrabold mt-0.5">Rp ${p.price.toLocaleString('id-ID')}</p>
+                            ${p.maxStock !== undefined ? `<span class="text-[10px] text-gray-500 font-semibold">Stok: ${p.maxStock}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="updateCart('${p.id}', -1)" class="w-8 h-8 rounded-lg bg-red-100 text-red-700 font-bold border-2 border-black flex items-center justify-center active:scale-95">-</button>
+                        <span class="w-6 text-center font-bold text-sm" id="qty-${p.id}">${qty}</span>
+                        <button onclick="updateCart('${p.id}', 1)" class="w-8 h-8 rounded-lg bg-green-100 text-green-700 font-bold border-2 border-black flex items-center justify-center active:scale-95">+</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateCartSummary();
+        }
+
+        window.filterBuyerProducts = function() {
+            renderBuyerProducts();
+        }
+
+        window.updateCart = function(productId, delta) {
+            playSound('jump');
+            const current = cart[productId] || 0;
+            const product = products.find(p => p.id === productId);
+            const newQty = current + delta;
+            
+            if (newQty < 0) return;
+            if (product && product.maxStock !== undefined && newQty > product.maxStock) {
+                showToast(`Stok ${product.name} tersisa ${product.maxStock} saja!`, 'error');
+                return;
+            }
+
+            if (newQty === 0) {
+                delete cart[productId];
+            } else {
+                cart[productId] = newQty;
+            }
+            renderBuyerProducts();
+        }
+
+        function updateCartSummary() {
+            let totalQty = 0;
+            let totalPrice = 0;
+            for (const [id, qty] of Object.entries(cart)) {
+                const product = products.find(p => p.id === id);
+                if (product) {
+                    totalQty += qty;
+                    totalPrice += product.price * qty;
+                }
+            }
+            document.getElementById('total-qty').textContent = totalQty;
+            document.getElementById('total-price').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+            document.getElementById('btn-submit').disabled = totalQty === 0;
+        }
+
+        window.submitBuyerOrder = async function() {
+            const name = document.getElementById('buyer-name').value.trim();
+            const className = document.getElementById('buyer-class').value.trim();
+            const phone = document.getElementById('buyer-phone').value.trim();
+
+            if (!name || !className || !phone) {
+                playSound('jump');
+                showToast('Mohon lengkapi identitas pembeli terlebih dahulu!', 'error');
+                return;
+            }
+
+            let itemsSummary = [];
+            let totalPrice = 0;
+            for (const [id, qty] of Object.entries(cart)) {
+                const product = products.find(p => p.id === id);
+                if (product) {
+                    itemsSummary.push({ id: product.id, name: product.name, price: product.price, qty: qty });
+                    totalPrice += product.price * qty;
+                }
+            }
+
+            const totalOrdersCount = orders.length + 1;
+            const assignedAdmin = (totalOrdersCount % 2 !== 0) 
+                ? { name: 'Kayla', phone: '6281382367076' } 
+                : { name: 'Mutiara', phone: '6281382367088' };
+
+            const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const newOrder = {
+                id: orderId,
+                orderNumber: totalOrdersCount,
+                assignedAdminName: assignedAdmin.name,
+                assignedAdminPhone: assignedAdmin.phone,
+                name: name,
+                class: className,
+                phone: phone,
+                items: itemsSummary,
+                total: totalPrice,
+                status: 'Pending',
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (useFirebase && db) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), newOrder);
+                } catch (e) {
+                    console.error("Error saving order to cloud:", e);
+                }
+            } else {
+                orders.unshift(newOrder);
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                updatePendingBadge();
+            }
+
+            lastSubmittedReceipt = newOrder;
+            playSound('success');
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+            cart = {};
+            renderBuyerProducts();
+            showReceiptModal(newOrder);
+
+            const waText = encodeURIComponent(`*PESANAN BARU #${newOrder.orderNumber} - SNACK SPACE AL-AZHAR 10*\n\n` +
+                `ID: ${newOrder.id}\n` +
+                `Ditujukan ke Admin: ${newOrder.assignedAdminName}\n` +
+                `Nama: ${newOrder.name}\n` +
+                `Kelas: ${newOrder.class}\n` +
+                `No HP: ${newOrder.phone}\n\n` +
+                `*Daftar Pesanan:*\n` +
+                newOrder.items.map(i => `- ${i.name} x${i.qty} (Rp ${(i.price * i.qty).toLocaleString('id-ID')})`).join('\n') +
+                `\n\n*Total: Rp ${newOrder.total.toLocaleString('id-ID')}*\n` +
+                `Catatan: Pembayaran COD / Tunai & diambil di stand lapangan SMPI Al-Azhar Kembangan 10.`);
+            
+            const waUrl = `https://wa.me/${assignedAdmin.phone}?text=${waText}`;
+            setTimeout(() => {
+                window.location.href = waUrl;
+            }, 800);
+        }
+
+        window.showReceiptModal = function(order) {
+            const details = document.getElementById('receipt-details');
+            let itemsHtml = order.items.map(i => `<div>• ${i.name} x${i.qty} (Rp ${(i.price * i.qty).toLocaleString('id-ID')})</div>`).join('');
+            details.innerHTML = `
+                <div><b>ID Pesanan:</b> ${order.id} (Pesanan #${order.orderNumber})</div>
+                <div><b>Waktu:</b> ${order.time}</div>
+                <div><b>Admin Penerima:</b> ${order.assignedAdminName}</div>
+                <div><b>Nama:</b> ${order.name} (${order.class})</div>
+                <div><b>No HP:</b> ${order.phone}</div>
+                <div class="border-t border-dashed border-gray-400 my-1 pt-1"><b>Daftar Pesanan:</b></div>
+                ${itemsHtml}
+                <div class="border-t border-dashed border-gray-400 my-1 pt-1 font-bold text-red-600">Total: Rp ${order.total.toLocaleString('id-ID')}</div>
+                <div><b>Status:</b> ${order.status}</div>
+            `;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+
+        window.closeReceiptModal = function() {
+            document.getElementById('receipt-modal').classList.add('hidden');
+        }
+
+        window.copyBuyerReceipt = function() {
+            if (!lastSubmittedReceipt) return;
+            const text = `*STRUK PESANAN SNACK SPACE*\nID: ${lastSubmittedReceipt.id} (Pesanan #${lastSubmittedReceipt.orderNumber})\nAdmin: ${lastSubmittedReceipt.assignedAdminName}\nNama: ${lastSubmittedReceipt.name} (${lastSubmittedReceipt.class})\nTotal: Rp ${lastSubmittedReceipt.total.toLocaleString('id-ID')}\nStatus: ${lastSubmittedReceipt.status}\nSilakan ambil & bayar di stand Snack Space SMPI Al-Azhar Kembangan 10!`;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Struk berhasil disalin ke clipboard!', 'success');
+        }
+
+        window.sendBuyerReceiptToWA = function() {
+            if (!lastSubmittedReceipt) return;
+            const targetPhone = lastSubmittedReceipt.assignedAdminPhone || '6281382367076';
+            const text = encodeURIComponent(`Halo Admin ${lastSubmittedReceipt.assignedAdminName}, saya ${lastSubmittedReceipt.name} dari kelas ${lastSubmittedReceipt.class} telah memesan dengan ID ${lastSubmittedReceipt.id} (Total: Rp ${lastSubmittedReceipt.total.toLocaleString('id-ID')}). Mohon konfirmasinya ya!`);
+            window.location.href = `https://wa.me/${targetPhone}?text=${text}`;
+        }
+
+        window.attemptSellerLogin = function() {
+            if (isAdminLoggedIn) {
+                switchView('seller');
+            } else {
+                document.getElementById('login-modal').classList.remove('hidden');
+            }
+        }
+
+        window.verifyAdminPin = function() {
+            const input = document.getElementById('admin-pin-input').value;
+            if (input === adminPin) {
+                isAdminLoggedIn = true;
+                closeModal('login-modal');
+                document.getElementById('admin-pin-input').value = '';
+                showToast('Login Admin (Kayla & Mutiara) Berhasil!', 'success');
+                switchView('seller');
+            } else {
+                playSound('jump');
+                showToast('PIN Admin Salah!', 'error');
+            }
+        }
+
+        window.logoutAdmin = function() {
+            isAdminLoggedIn = false;
+            switchView('buyer');
+            showToast('Admin keluar dari dashboard.', 'info');
+        }
+
+        window.openChangePinModal = function() {
+            document.getElementById('pin-modal').classList.remove('hidden');
+        }
+
+        window.saveNewPin = function() {
+            const p1 = document.getElementById('new-pin-input').value;
+            const p2 = document.getElementById('new-pin-confirm').value;
+            if (!p1 || p1 !== p2) {
+                showToast('PIN baru tidak cocok atau kosong!', 'error');
+                return;
+            }
+            adminPin = p1;
+            localStorage.setItem('snack_space_pin', adminPin);
+            closeModal('pin-modal');
+            document.getElementById('new-pin-input').value = '';
+            document.getElementById('new-pin-confirm').value = '';
+            showToast('PIN Admin berhasil diubah!', 'success');
+        }
+
+        window.renderSellerDashboard = function() {
+            updateStats();
+            renderProductSummary();
+            renderClassSummary();
+            renderOrders();
+            updatePendingBadge();
+        }
+
+        function updateStats() {
+            let revenue = 0;
+            let gross = 0;
+            let itemsSoldCount = 0;
+            let pendingCount = 0;
+
+            orders.forEach(o => {
+                gross += o.total;
+                if (o.status === 'Selesai') {
+                    revenue += o.total;
+                    o.items.forEach(i => itemsSoldCount += i.qty);
+                }
+                if (o.status === 'Pending') {
+                    pendingCount++;
+                }
+            });
+
+            document.getElementById('stat-revenue').textContent = `Rp ${revenue.toLocaleString('id-ID')}`;
+            document.getElementById('stat-gross-revenue').textContent = `Rp ${gross.toLocaleString('id-ID')}`;
+            document.getElementById('stat-orders-count').textContent = orders.length;
+            document.getElementById('stat-pending-count').textContent = pendingCount;
+            document.getElementById('stat-items-sold').textContent = `${itemsSoldCount} Pcs`;
+
+            const target = 500000;
+            let percent = Math.min(100, Math.round((revenue / target) * 100));
+            document.getElementById('target-percent').textContent = `${percent}%`;
+            document.getElementById('target-progress-bar').style.width = `${percent}%`;
+        }
+
+        window.updatePendingBadge = function() {
+            const count = orders.filter(o => o.status === 'Pending').length;
+            const badge = document.getElementById('badge-pending-orders');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderProductSummary() {
+            const grid = document.getElementById('product-summary-grid');
+            grid.innerHTML = '';
+
+            let productCounts = {};
+            products.forEach(p => productCounts[p.name] = { count: 0, icon: p.icon });
+
+            orders.forEach(o => {
+                o.items.forEach(i => {
+                    if (!productCounts[i.name]) productCounts[i.name] = { count: 0, icon: '📦' };
+                    productCounts[i.name].count += i.qty;
+                });
+            });
+
+            for (const [name, data] of Object.entries(productCounts)) {
+                const itemBox = document.createElement('div');
+                itemBox.className = 'bg-gray-50 border-2 border-black p-2.5 rounded-lg flex items-center justify-between';
+                itemBox.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">${data.icon}</span>
+                        <span class="font-bold text-xs text-gray-800">${name}</span>
+                    </div>
+                    <span class="pixel-font text-xs bg-yellow-200 px-2 py-0.5 rounded border border-black">${data.count} Pcs</span>
+                `;
+                grid.appendChild(itemBox);
+            }
+        }
+
+        function renderClassSummary() {
+            const list = document.getElementById('class-summary-list');
+            list.innerHTML = '';
+
+            let classCounts = {};
+            orders.forEach(o => {
+                const cls = o.class || 'Lainnya';
+                if (!classCounts[cls]) classCounts[cls] = 0;
+                classCounts[cls] += o.total;
+            });
+
+            if (Object.keys(classCounts).length === 0) {
+                list.innerHTML = `<div class="text-xs text-gray-500 text-center py-4">Belum ada data kelas.</div>`;
+                return;
+            }
+
+            for (const [cls, total] of Object.entries(classCounts)) {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center bg-white p-2 rounded border border-yellow-300 text-xs font-bold';
+                row.innerHTML = `<span><i class="fa-solid fa-graduation-cap text-yellow-600 mr-1.5"></i> ${cls}</span><span class="text-green-700">Rp ${total.toLocaleString('id-ID')}</span>`;
+                list.appendChild(row);
+            }
+        }
+
+        window.setViewMode = function(mode) {
+            viewMode = mode;
+            const cardContainer = document.getElementById('orders-card-container');
+            const tableContainer = document.getElementById('orders-table-container');
+            const btnCard = document.getElementById('view-btn-card');
+            const btnTable = document.getElementById('view-btn-table');
+
+            if (mode === 'card') {
+                cardContainer.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                btnCard.className = 'px-2.5 py-1.5 text-xs bg-yellow-400 text-black font-bold border-r-2 border-black';
+                btnTable.className = 'px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-200 font-bold';
+            } else {
+                cardContainer.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+                btnTable.className = 'px-2.5 py-1.5 text-xs bg-yellow-400 text-black font-bold';
+                btnCard.className = 'px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-200 font-bold border-r-2 border-black';
+            }
+            renderOrders();
+        }
+
+        window.renderOrders = function() {
+            const search = document.getElementById('seller-search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const cardContainer = document.getElementById('orders-card-container');
+            const tableBody = document.getElementById('orders-table-body');
+            const emptyState = document.getElementById('empty-state');
+
+            cardContainer.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            const filtered = orders.filter(o => {
+                const matchSearch = o.name.toLowerCase().includes(search) || o.class.toLowerCase().includes(search) || o.id.toLowerCase().includes(search);
+                const matchStatus = statusFilter === 'ALL' || o.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(o => {
+                let statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-400';
+                if (o.status === 'Proses') statusColor = 'bg-blue-100 text-blue-800 border-blue-400';
+                if (o.status === 'Siap') statusColor = 'bg-purple-100 text-purple-800 border-purple-400';
+                if (o.status === 'Selesai') statusColor = 'bg-green-100 text-green-800 border-green-400';
+
+                let itemsStr = o.items.map(i => `${i.name} x${i.qty}`).join(', ');
+                const adminAssigned = o.assignedAdminName || 'Kayla';
+
+                const card = document.createElement('div');
+                card.className = 'mario-card p-4 bg-white flex flex-col justify-between text-xs space-y-3';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-bold text-red-600 text-sm">${o.name}</span>
+                                <span class="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded border border-black text-[10px] ml-1">${o.class}</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${statusColor}">${o.status}</span>
+                        </div>
+                        <p class="text-gray-500 text-[11px] mb-1"><i class="fa-solid fa-clock mr-1"></i> ${o.time} | ID: ${o.id}</p>
+                        <p class="text-blue-700 text-[11px] font-bold mb-1"><i class="fa-solid fa-user-shield mr-1"></i> Admin PJ: ${adminAssigned}</p>
+                        <div class="bg-gray-50 p-2 rounded border border-gray-300 my-2 space-y-1">
+                            ${o.items.map(i => `<div class="flex justify-between"><span>• ${i.name} x${i.qty}</span><span>Rp ${(i.price * i.qty).toLocaleString('id-ID')}</span></div>`).join('')}
+                        </div>
+                        <p class="font-extrabold text-red-600 text-sm">Total: Rp ${o.total.toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="pt-2 border-t border-gray-200 flex flex-wrap gap-1.5 justify-between items-center">
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="mario-input p-1 text-[11px] font-bold bg-white">
+                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Proses" ${o.status === 'Proses' ? 'selected' : ''}>Diproses</option>
+                            <option value="Siap" ${o.status === 'Siap' ? 'selected' : ''}>Siap</option>
+                            <option value="Selesai" ${o.status === 'Selesai' ? 'selected' : ''}>Lunas</option>
+                        </select>
+                        <div class="flex space-x-1">
+                            <a href="https://wa.me/${formatWhatsAppNumber(o.phone)}?text=${encodeURIComponent(`Halo ${o.name}, pesanan Snack Space kamu (ID: ${o.id}) statusnya sekarang: *${o.status}*. Silakan diambil di stand ya!`)}" target="_blank" class="mario-btn-green px-2 py-1 text-[11px] font-bold rounded flex items-center"><i class="fa-brands fa-whatsapp"></i></a>
+                            <button onclick="deleteOrder('${o.id}')" class="mario-btn-red px-2 py-1 text-[11px] font-bold rounded"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 border-b border-black';
+                tr.innerHTML = `
+                    <td class="p-2 border-r border-black">${o.time}<br><span class="text-[9px] text-gray-500">${o.id}</span></td>
+                    <td class="p-2 border-r border-black font-bold">${o.name}<br><span class="text-blue-600">${o.class}</span></td>
+                    <td class="p-2 border-r border-black">${itemsStr}<br><span class="text-[10px] text-gray-500">PJ: ${adminAssigned}</span></td>
+                    <td class="p-2 border-r border-black font-extrabold text-red-600">Rp ${o.total.toLocaleString('id-ID')}</td>
+                    <td class="p-2 border-r border-black"><span class="px-2 py-0.5 rounded border text-[10px] ${statusColor}">${o.status}</span></td>
+                    <td class="p-2 text-center flex justify-center space-x-1">
+                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="mario-input p-1 text-[10px] font-bold bg-white">
+                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Proses" ${o.status === 'Proses' ? 'selected' : ''}>Proses</option>
+                            <option value="Siap" ${o.status === 'Siap' ? 'selected' : ''}>Siap</option>
+                            <option value="Selesai" ${o.status === 'Selesai' ? 'selected' : ''}>Lunas</option>
+                        </select>
+                        <button onclick="deleteOrder('${o.id}')" class="mario-btn-red px-2 py-1 rounded text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        window.updateOrderStatus = async function(id, newStatus) {
+            if (useFirebase && db) {
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id), { status: newStatus });
+                } catch (e) {
+                    console.error("Error updating status:", e);
+                }
+            } else {
+                const target = orders.find(o => o.id === id);
+                if (target) {
+                    target.status = newStatus;
+                    localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                    renderSellerDashboard();
+                }
+            }
+            showToast(`Status pesanan ${id} diperbarui menjadi ${newStatus}`, 'success');
+        }
+
+        window.deleteOrder = async function(id) {
+            if (useFirebase && db) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', id));
+                } catch (e) {
+                    console.error("Error deleting order:", e);
+                }
+            } else {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                renderSellerDashboard();
+            }
+            showToast(`Pesanan ${id} dihapus.`, 'info');
+        }
+
+        window.openConfirmModal = function(msg, callback) {
+            document.getElementById('confirm-message').textContent = msg;
+            const yesBtn = document.getElementById('confirm-btn-yes');
+            yesBtn.onclick = () => {
+                closeModal('confirm-modal');
+                callback();
+            };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        window.confirmResetData = async function() {
+            if (useFirebase && db) {
+                for (const o of orders) {
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', o.id));
+                    } catch (e) {}
+                }
+            } else {
+                orders = [];
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                renderSellerDashboard();
+            }
+            showToast('Semua pesanan dikosongkan.', 'info');
+        }
+
+        window.simulateOrder = async function() {
+            const names = ['Faris', 'Aisyah', 'Rizky', 'Zahra', 'Kevin', 'Nabila'];
+            const classes = ['7A', '7B', '8A', '8B', '9A', '9B'];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomClass = classes[Math.floor(Math.random() * classes.length)];
+            const randomProd = products[Math.floor(Math.random() * products.length)];
+            const qty = Math.floor(1 + Math.random() * 3);
+
+            const totalCount = orders.length + 1;
+            const assignedAdmin = (totalCount % 2 !== 0) 
+                ? { name: 'Kayla', phone: '6281382367076' } 
+                : { name: 'Mutiara', phone: '6281382367088' };
+
+            const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const simOrder = {
+                id: orderId,
+                orderNumber: totalCount,
+                assignedAdminName: assignedAdmin.name,
+                assignedAdminPhone: assignedAdmin.phone,
+                name: randomName,
+                class: randomClass,
+                phone: '08123456789',
+                items: [{ id: randomProd.id, name: randomProd.name, price: randomProd.price, qty: qty }],
+                total: randomProd.price * qty,
+                status: 'Pending',
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (useFirebase && db) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), simOrder);
+            } else {
+                orders.unshift(simOrder);
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                renderSellerDashboard();
+            }
+            playSound('coin');
+            showToast(`Simulasi Pesanan masuk dari ${randomName} (${randomClass}) ke PJ ${assignedAdmin.name}!`, 'success');
+        }
+
+        window.exportToCSV = function() {
+            let csv = 'ID Pesanan,Waktu,Admin PJ,Nama Pembeli,Kelas,No HP,Total,Status,Item\n';
+            orders.forEach(o => {
+                let itemsStr = o.items.map(i => `${i.name} (x${i.qty})`).join('; ');
+                csv += `"${o.id}","${o.time}","${o.assignedAdminName || 'Kayla'}","${o.name}","${o.class}","${o.phone}","${o.total}","${o.status}","${itemsStr}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Laporan_MarketDay_SnackSpace.csv';
+            a.click();
+            showToast('Laporan berhasil di-export ke CSV!', 'success');
+        }
+
+        window.openStockModal = function() {
+            renderStockList();
+            populateManualProductSelect();
+            document.getElementById('stock-modal').classList.remove('hidden');
+        }
+
+        window.renderStockList = function() {
+            const container = document.getElementById('stock-list-container');
+            container.innerHTML = '';
+
+            products.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2.5 bg-gray-50 border-2 border-black rounded-lg text-xs';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">${p.icon}</span>
+                        <div>
+                            <p class="font-bold">${p.name}</p>
+                            <p class="text-gray-600">Rp ${p.price.toLocaleString('id-ID')} | Stok: ${p.maxStock !== undefined ? p.maxStock : 'Unlimited'}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="editProduct('${p.id}')" class="mario-btn-blue px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="mario-btn-red px-2 py-1 rounded text-[10px] font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        window.handleProductSubmit = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const name = document.getElementById('prod-name').value;
+            const price = Number(document.getElementById('prod-price').value);
+            const category = document.getElementById('prod-cat').value;
+            const icon = document.getElementById('prod-icon').value || '🍲';
+            const maxStockVal = document.getElementById('prod-max-stock').value;
+            const maxStock = maxStockVal !== '' ? Number(maxStockVal) : undefined;
+
+            const prodId = id || ('PROD-' + Date.now());
+            const prodData = { id: prodId, name, price, category, icon, maxStock };
+
+            if (useFirebase && db) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', prodId), prodData);
+            } else {
+                const existingIdx = products.findIndex(p => p.id === prodId);
+                if (existingIdx >= 0) {
+                    products[existingIdx] = prodData;
+                } else {
+                    products.push(prodData);
+                }
+                localStorage.setItem('snack_space_products', JSON.stringify(products));
+                renderBuyerProducts();
+            }
+            showToast('Produk berhasil disimpan!', 'success');
+
+            e.target.reset();
+            document.getElementById('prod-id').value = '';
+            renderStockList();
+        }
+
+        window.editProduct = function(id) {
+            const p = products.find(item => item.id === id);
+            if (p) {
+                document.getElementById('prod-id').value = p.id;
+                document.getElementById('prod-name').value = p.name;
+                document.getElementById('prod-price').value = p.price;
+                document.getElementById('prod-cat').value = p.category;
+                document.getElementById('prod-icon').value = p.icon;
+                document.getElementById('prod-max-stock').value = p.maxStock !== undefined ? p.maxStock : '';
+            }
+        }
+
+        window.deleteProduct = async function(id) {
+            if (useFirebase && db) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', id));
+            } else {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('snack_space_products', JSON.stringify(products));
+                renderBuyerProducts();
+            }
+            showToast('Produk dihapus.', 'info');
+            renderStockList();
+        }
+
+        window.openManualOrderModal = function() {
+            populateManualProductSelect();
+            document.getElementById('manual-order-modal').classList.remove('hidden');
+        }
+
+        function populateManualProductSelect() {
+            const select = document.getElementById('man-product');
+            select.innerHTML = '';
+            products.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.icon} ${p.name} (Rp ${p.price.toLocaleString('id-ID')})`;
+                select.appendChild(opt);
+            });
+        }
+
+        window.handleManualOrderSubmit = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('man-name').value;
+            const className = document.getElementById('man-class').value;
+            const phone = document.getElementById('man-phone').value;
+            const prodId = document.getElementById('man-product').value;
+            const qty = Number(document.getElementById('man-qty').value);
+
+            const prod = products.find(p => p.id === prodId);
+            if (!prod) return;
+
+            const totalCount = orders.length + 1;
+            const assignedAdmin = (totalCount % 2 !== 0) 
+                ? { name: 'Kayla', phone: '6281382367076' } 
+                : { name: 'Mutiara', phone: '6281382367088' };
+
+            const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const manualOrder = {
+                id: orderId,
+                orderNumber: totalCount,
+                assignedAdminName: assignedAdmin.name,
+                assignedAdminPhone: assignedAdmin.phone,
+                name: name,
+                class: className,
+                phone: phone,
+                items: [{ id: prod.id, name: prod.name, price: prod.price, qty: qty }],
+                total: prod.price * qty,
+                status: 'Pending',
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (useFirebase && db) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), manualOrder);
+            } else {
+                orders.unshift(manualOrder);
+                localStorage.setItem('snack_space_orders', JSON.stringify(orders));
+                renderSellerDashboard();
+            }
+            closeModal('manual-order-modal');
+            e.target.reset();
+            playSound('coin');
+            showToast('Pesanan manual berhasil ditambahkan!', 'success');
+        }
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        window.hitQuestionBlock = function(e) {
+            playSound('coin');
+            confetti({ particleCount: 50, spread: 60, origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight } });
+            showToast('🍄 Power-Up! Snack Space Al-Azhar 10 Active!', 'success');
+        }
+
+        window.onload = function() {
+            initFirebaseApp();
+            renderBuyerProducts();
+        };
+    </script>
+</body>
+</html>
